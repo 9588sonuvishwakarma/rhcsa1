@@ -1,0 +1,451 @@
+1==>>network configurations
+     go wi-fi connection=>ipv4=>setting id add,gateway,and dns then on/off click
+2==>>vim /etc/yum.repos.d/new.repo
+     [APPStream]
+     name=AppStream
+     baseurl=file:///mnt/AppStream
+     gpgcheck=0
+     enabled=1
+     [BaseOS]
+     name=BaseOS
+     baseurl=file:///mnt/BaseOS
+     gpgcheck=0
+     enabled=1
+     :wq!
+     yum repoinfo
+     yum repolist all
+
+3==>>
+     Semanage port -a -t http_port_t -p tcp 82   (man semanage port ==>copy)
+     systemctl restart httpd
+     systemctl enable --now httpd
+     systemctl status httpd
+     systemctl status firewalld
+     if active, then use command
+     firewall-cmd --permanent --add-port=82/tcp
+     firewall-cmd --reload
+     firewall-cmd --list-all
+
+4==>> useradd natasha
+      crontab -e -u natasha
+       30	13	*	*	*	/bin/echo "hello"
+       */3	*	*	*	*	/bin/echo "hiya"
+       :wq!
+       systemctl restart crond
+       systemctl enable crond
+       crontab -l -u natasha
+
+5==>>groupadd sysadmin
+     usermod -aG sysadmin natasha
+     useradd sarah
+     usermod -aG sysadmin sarah
+     useradd -s /sbin/nologin harry
+     passwd natasha 
+     passwd sarah
+     passwd harry
+
+6==>>mkdir -p /common/admin
+     chgrp sysadmin /common/admin
+     chmod 2770 /common/admin
+
+7==>>vim  /etc/chrony.conf
+     comment pool line ko
+      server hostname iburst
+      :wq!
+      systemctl restart chronyd
+      systemctl enable chronyd
+      chronyc sources -v
+
+8==>>useradd simone
+     mkdir /root/found
+     find / -user simone -exec cp -a -rvf {} /root/found \;
+
+9==>>yum install autofs -y
+     vim /ect/auto.master.d/filename.autofs
+     /-	/etc/auto.misc
+     vim /etc/auto.misc
+     /homeuse/remoteuserX   -rw,soft,intr    ip/hostname:/homeuse/remoteuserX
+    systemctl  restart autofs
+    systemctl  enable autofs
+
+10==>> useradd -u 2112 barry
+       passwd barry
+       id barry
+
+11==>>groupadd elite
+     visudo
+      %elite ALL=(ALL)   NOPASSWD:ALL
+      :wq!
+
+12==>>vim /usr/local/bin/mysearch
+       #!/bin/bash
+        find /usr -size -10M -perm /g=s > /root/lines
+        :wq!
+      chmod a+x /usr/local/bin/mysearch
+
+13==>>root---
+.................
+      vim /bin/testapp
+      #!/bin/bash
+      if
+        [ -f ~/.testapp/testapp.conf ]
+     then 
+        cat ~/.testapp/testapp.conf
+      else
+           echo "hell+o root"
+      fi
+       :wq!
+
+      chmod a+x /bin/testapp
+      useradd kl
+      su kl
+       cd
+...............
+      mkdir  .testapp
+      cd .testapp
+      vim testapp.conf
+      "hello kl"
+      :wq!
+      su root
+       testapp ==> hello root
+      su kl
+       testapp  ==>> hello kl
+
+14==>> CONTAINER....
+       useradd andrew
+       ssh andrew@localhost
+       wget url
+       podman image build . -t watcher
+       podman image ls
+
+
+15==>>     as root===>>>
+        mkdir -p /opt/files /opt/processed 
+        chown andrew: andrew /opt/files
+        chown ansrew:andrew /opt/processed
+        ssh andrew@localhost
+
+        podman container run -d --name watcher -v/opt/files:/opt/files:Z -v /opt/processes:/opt/processed:Z watcher
+        podman ps
+
+         mkdir -p ~/.config/systemd/user
+         cd ~/.config/systemd/user
+
+        podman generate systemd --name watcher --files --now
+        systemctl --user enable daemon-reload
+        systemctl --user enable --now container-watcher.service
+        systemctl --user start --now container-watcher.service
+        loginctl enable-linger
+
+16==>>yum install tuned -y
+      systemctl enable --now tuned
+      tuned-adm recommend
+      tuned-adm profile virtual-guest
+      tuned-adm active
+      tuned-adm list
+
+17==>>backup
+    tar -cvjf , -cJvf , -czvf  /home/backup.tar.bz2 , z2 , gz   /etc
+
+18==>>password 
+      when system start two option come
+      press up down key initially
+      normal mode to run ma chine 
+      second is rescue( to restart machine)
+
+      at second press e.
+      at end 4 line. enter (rd.break not enter and press ctrl x)
+      new window open....
+      press enter then 
+      mount -o remount,rw /sysroot  #to rw mode me
+      then press enter
+      chroot /sysroot press enter 
+      passwd
+      press enter
+      enter password===> 343sdu (not still define in maitaince mode me)
+      touch /.autorelabel ( to create file in the hidden mode)
+      press enter  
+
+      (write two time) exit exit .........
+
+
+     sometime open the unexpected window then you
+     root 
+     enter passwrd
+     systemctl set-default graphical.target
+     press enter
+     startx
+     press enter
+
+19==>>Hostname....change
+      hostnamectl set-hostname servername.example.com
+
+
+20==>>partition command....
+     fdisk /dev/sdc
+     press enter
+     m ==>> m(option see)
+     n  (add partition)
+     press enter
+    enter
+     enter
+    enter
+    +500M (number option )
+    enter
+    w(write disk me write)
+    lsblk
+    option......
+    1...mkfs  for make file system 
+
+    How to create lvm ?
+    #create physical volume
+    pvcreate /dev/sdb2
+
+     #to check
+    pvs
+
+   #to detail
+    pvdisplay
+
+    #creae vG (volume group)
+    vgcreate -s 8M myvol /dev/sdb2   ( if you not give the size then it automatically 4M)
+
+   #to see and detail
+   vgs
+    vgdisplay   (1gb = 1000M , 1 gib =  1024M)
+
+    #create lv (logical volume)
+    lvcreate -l 50 -n sonu/dev/myvol (-l for physical size, -L for acture size)
+
+    #to see
+    lsblk
+
+    #now give the filesystem (ext1-4, vfat, xfet)
+  
+    mkfs.vfat /dev/myvol/sonu
+
+   #for mounting 
+    mkdir /database
+   mount /dev/myvol/sonu /database
+   lsblk
+
+   #to see the UUID 
+   blkid     ===>>>(copy UUID)
+
+   #open text editor (here fstab is for permanent mount)
+   vim /etc/fstab 
+   entry UUID
+   :wq!
+
+    #to check (if any error present than it pops error otherwise not)
+    mount -a
+
+    #to see
+    lsblk
+
+
+    2.... mkswap ( FOR SWAP)
+
+   mkswap /dev/sdc1
+   swapon /dev/sdc1
+
+   vim /etc/fstab
+   in text editor......
+    /dev/sdb2	none 	swap	defaults 	0	0
+   :wq!
+   checking..
+  lsblk
+
+21==>>Resize the logical volume "vo" size to 20 extents
+       
+      lvexend -rl 20	 /dev/myvol/data  (not define types then l  if give type then L)
+       df -h (check)
+
+     lvextend .............
+      lvextend -rl 20 /dev/sonu/pranjal
+      lvreduce -rl 20 /dev/sonu/pranjal
+    Reduce...........
+      lvreduce  -rL 300M /dev/sonu/pranjal
+      lvextend -rL 500M  /dev/sonu/pranjal
+
+
+
+
+
+  
+    
+
+     
+ secon
+ 
+ n 1==> vim /etc/yum.repos.d/new.repo
+     [AppStream]
+     name=AppStream
+     baseurl=http://content/rhel9.0/x86_64/dvd/AppStream
+     gpgcheck=0
+     enabled=1
+     [BaseOS]
+     name=BaseOS
+     baseurl=http://content/rhel9.0/x86_64/dvd/BaseOS
+     gpgcheck=0
+     enabled=1
+     :wq!
+     yum repoinfo
+     yum repolist
+
+  yum install httpd 
+2==> Semanage port -a -t http_port_t -p tcp 82
+     systemctl restart httpd
+     systemctl enable httpd
+     systemctl enable --now httpd
+     systemctl status firewalld
+     firewall-cmd --permnent --add-port=82/tcp
+     firewall-cmd --reload
+     firewall-cmd --list-all
+
+3==>groupadd sysadm
+    useradd harry
+    useradd natasha
+    usermod -aG sysadm harry
+    usermod -aG sysadm natasha
+    useradd -s /sbin/nologin sarah
+    passwd harry
+    passwd natasha
+    passwd sarah
+
+4==>mkdir -p /shared/sysadm
+    chgrp sysadm /shared/sysadm
+    chmod 2770 /shared/sysadm
+   
+5==>yum install autofs -y
+    vim /etc/auto.master.d/new.autofs
+    /-	/etc/auto.misc
+    :wq!
+    vim /etc/auto.misc
+   /our_home/remoteuser5 	-rw,soft,intr	ip/hostname:/our_home/remoteuser5
+   :wq!
+   systemctl restart autofs
+   systemctl enable --now autofs
+su - remoteuser5
+pwd
+
+6==>crontab	-e	-u natasha
+    */3	*	*	*	*	/bin/echo "EX200 running"
+    :wq!
+    systemctl restart crond
+    systemctl enable crond
+    crontab -l -u natasha
+
+7==>vim /etc/chrony.conf
+    comment pool line ko
+    server ntp iburst
+     :wq!
+    systemctl restart chronyd
+    systemctl enable chronyd
+    chronyc sources -v
+timedatectl
+
+8==>mkdir /root/find.user
+    find / -user sarah -exec cp -a -rvf {} /root/find.user \;
+    ll /root/find.user
+
+9==>grep "ich" /usr/share/dict/words > /root/lines
+vim /root/lines
+
+10==>useradd -u 1545 John 
+     passwd John
+     radiowits
+     id John
+
+11==>tar -czvf /root/archive.gz /etc
+
+12==> CONTAINER....
+       useradd andrew
+       ssh andrew@localhost
+       wget url
+       podman image build . -t watche
+       podman image ls
+
+
+13==>> as root===>>>
+        mkdir -p /opt/files /opt/processed 
+        chown andrew:andrew /opt/files
+        chown ansrew:andrew /opt/processed
+        ssh andrew@localhost
+
+        podman container run -d --name watcher -v /opt/files:/opt/files:Z -v /opt/processes:/opt/processed:Z watche(image_name)
+        podman ps
+
+         mkdir -p ~/.config/systemd/user
+         cd ~/.config/systemd/user
+
+        podman generate systemd --name watcher --new --files
+        systemctl --user enable daemon-reload
+        systemctl --user enable --now container-watcher.service
+        systemctl --user start --now container-watcher.service
+        loginctl enable-linger
+    
+   
+
+SECONDARY MACHINE..................
+
+1 ==>>password 
+      when system start two option come
+      press up down key initially
+      normal mode to run ma chine 
+      second is rescue( to restart machine)
+
+      at second press e.
+      at end 4 line. enter (rd.break not enter and press ctrl x)
+      new window open....
+      press enter then 
+      mount -o remount,rw /sysroot  #to rw mode me
+      then press enter
+      chroot /sysroot press enter 
+      passwd
+      press enter
+      enter password===> 343sdu (not still define in maitaince mode me)
+      touch /.autorelabel ( to create file in the hidden mode)
+      press enter  
+
+      (write two time) exit exit .........
+
+2==> SAME AS PRIMARY MACHINE
+
+3==>fdisk /dev/sde
+     m
+     n
+     enter
+     enter
+     +712M
+     mkswap /dev/sde1
+     swapon /dev/sde1
+     vim /etc/fstab
+     /dev/sde1	none 	swap	defaults 	0	0
+    :wq!
+    
+4==>fdisk /dev/sde
+     m
+     n
+     enter
+     enter
+     +500M
+     pvcreate /dev/sde2
+     vgcreate 
+
+
+5==>yum install tuned -y
+      systemctl enable --now tuned
+      tuned-adm recommend
+      tuned-adm profile (virtual-guest) given
+      tuned-adm active
+      tuned-adm list   
+
+  
+
+
+
+
+   
+     
+     
